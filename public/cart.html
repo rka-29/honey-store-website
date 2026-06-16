@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سلة الطلب - عسل جناحي البحرين</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="cart.css" />
+</head>
+<body>
+
+<div class="unified-bar" id="stickyNav">
+  <div class="ubar-brand">
+    <span>مملكة البحرين</span>
+    <span class="top-bar-divider">|</span>
+    <span>عسل جناحي</span>
+    <span class="top-bar-divider">|</span>
+    <span>منذ عام 2017</span>
+  </div>
+  <nav class="ubar-nav">
+    <div class="sticky-nav-inner">
+      <a href="index.html" class="snav-link"><span class="snav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></span><span>الرئيسية</span></a>
+      <a href="products.html" class="snav-link">
+        <span class="snav-icon snav-jar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3h7l1 3H7.5L8.5 3z"/><rect x="5.5" y="6" width="13" height="2" rx="1"/><path d="M6.5 8h11v9.5a2.5 2.5 0 01-2.5 2.5h-6a2.5 2.5 0 01-2.5-2.5V8z"/><line x1="10" y1="12" x2="10" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="19" y1="2" x2="22.5" y2="5.5"/><circle cx="20.5" cy="3" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+        <span>أنواع العسل</span>
+      </a>
+      <a href="cart.html" class="snav-link snav-cart">
+        <span class="snav-icon snav-cart-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg></span>
+        <span>السلة</span>
+        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+      </a>
+    </div>
+  </nav>
+  <div class="ubar-spacer"></div>
+</div>
+
+<!-- HEADER -->
+<div class="cart-page-header">
+  <div class="cart-page-header-inner">
+    <div>
+      <div class="cart-page-tag"> سلة الطلب</div>
+      <h1>راجع طلبك وأرسله عبر واتساب</h1>
+    </div>
+  </div>
+</div>
+
+<div class="cart-wrapper">
+
+  <!-- طلباتك -->
+  <div class="cart-section">
+    <div class="cart-section-header">
+      <div class="cart-icon-wrap">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#C8880C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>
+      </div>
+      <h2>طلباتك</h2>
+    </div>
+    <div class="cart-body">
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-summary">
+        <div class="cart-summary-row">
+          <span class="cart-summary-label">المجموع الكلي</span>
+          <span class="cart-summary-total">
+            <span id="cartTotal">0</span>
+            <span class="cart-summary-currency">د.ب</span>
+          </span>
+        </div>
+        <div class="cart-delivery-cost"> غير شامل تكلفة التوصيل </div>
+        <div class="cart-delivery-cost"> التوصيل من 1.5 د.ب إلى 2 د.ب</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- معلومات التوصيل -->
+  <div class="cart-form-section">
+    <div class="cart-section-header">
+      <div class="cart-icon-wrap">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#C8880C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <h2>العنوان</h2>
+    </div>
+    <div class="cart-form-body">
+      <div class="cart-form">
+        <div class="form-group">
+          <label class="form-label">اكتب عنوانك بالتفصيل</label>
+          <textarea id="fullAddress"  style="min-height:100px;"></textarea>
+        </div>
+       
+        <button type="button" id="sendOrderBtn" class="send-order-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span>تنفيذ الطلب عبر واتساب</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function updateCartBadge() {
+  try {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const total = cart.reduce(function(sum, item) { return sum + (item.qty || 1); }, 0);
+    const badge = document.getElementById('cartBadge');
+    if (badge) {
+      if (total > 0) { badge.textContent = total; badge.style.display = 'flex'; }
+      else { badge.style.display = 'none'; }
+    }
+  } catch(e) {}
+}
+updateCartBadge();
+const nav = document.getElementById('stickyNav');
+window.addEventListener('scroll', function() {
+  if (window.scrollY > 10) nav.classList.add('nav-scrolled');
+  else nav.classList.remove('nav-scrolled');
+}, { passive: true });
+</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

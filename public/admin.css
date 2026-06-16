@@ -1,0 +1,296 @@
+/* ═══════════════════════════════ ADMIN ═══════════════════════════════ */
+
+/* ── HERO HEADER ── */
+.admin-hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg, #C8880C, #F5C843);
+  padding:50px 5% 44px;text-align:center;
+}
+.admin-hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V17L28 1l28 16v33zm0 0v34l-28-17V66m0 0l28 17V66' fill='none' stroke='%23C8860A' stroke-width='.6' opacity='.14'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.admin-hero h1{
+  font-family:'Amiri',serif;
+  font-size:clamp(2rem,5vw,3.2rem);
+  color:#2C150A;
+}
+.admin-hero p{font-size:15px;color:#2C150A;margin:0;position:relative;font-weight:400}
+
+/* ── LAYOUT ── */
+.admin-wrapper{max-width:1100px;margin:0 auto;padding:44px 24px 100px}
+
+/* ── SECTION TITLE ── */
+.admin-sec-title{
+  font-family:'Amiri',serif;font-size:1.45rem;color:#2C150A;
+  margin:0 0 22px;font-weight:700;
+  display:flex;align-items:center;gap:10px;
+}
+.admin-sec-title::before{content:'';display:block;width:4px;height:22px;background:#C8860A;border-radius:4px}
+
+/* ── FORM CARD ── */
+.admin-form-card{
+  background:#fff;border:1px solid rgba(200,134,10,.12);
+  border-radius:28px;box-shadow:0 8px 32px rgba(44,21,10,.1);
+  padding:36px;margin-bottom:50px;
+}
+
+/* ── FORM GRID ── */
+.admin-form{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.admin-fg{display:flex;flex-direction:column;gap:6px}
+.admin-fg.span2{grid-column:span 2}
+.admin-fg.span3{grid-column:span 3}
+
+/* submit button */
+.admin-submit{
+  grid-column:span 3;
+  height:54px;border:none;border-radius:99px;
+  background:linear-gradient(135deg,#2C150A,#7A3E18);
+  color:#F0B429;font-size:17px;font-weight:700;
+  cursor:pointer;transition:all .25s;
+  box-shadow:0 6px 24px rgba(44,21,10,.22);letter-spacing:.3px;
+}
+.admin-submit:hover{
+  background:linear-gradient(135deg,#C8860A,#F0B429);
+  color:#1E0E04;transform:translateY(-2px);
+  box-shadow:0 12px 30px rgba(200,134,10,.35);
+}
+
+/* ── PRODUCTS GRID ── */
+.admin-products-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;
+}
+
+/* product card — reuses products.css rules, add only admin extras */
+.admin-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+
+.available-btn{
+  background:#FDF3DC;color:#2C150A;
+  border:1.5px solid rgba(200,134,10,.3);
+  padding:11px 14px;border-radius:99px;cursor:pointer;
+  font-weight:700;font-size:13px;transition:all .22s;
+}
+.available-btn:hover{background:#FDEAB0;transform:translateY(-2px)}
+
+@media(max-width:780px){
+  .admin-form{grid-template-columns:1fr 1fr}
+  .admin-fg.span3,.admin-submit{grid-column:span 2}
+  .admin-form-card{padding:22px}
+}
+@media(max-width:500px){
+  .admin-form{grid-template-columns:1fr}
+  .admin-fg.span2,.admin-fg.span3,.admin-submit{grid-column:span 1}
+}
+
+/* ══ UPLOAD BOX ══ */
+.upload-box {
+  border: 2px dashed rgba(200,134,10,.35);
+  border-radius: 18px;
+  background: #FDF8F0;
+  overflow: hidden;
+  transition: border-color .22s, background .22s;
+}
+.upload-box.drag-over {
+  border-color: #C8860A;
+  background: #FDF3DC;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 32px 20px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.upload-placeholder:hover { background: rgba(200,134,10,.05); }
+.upload-icon { font-size: 2.2rem; line-height: 1; }
+.upload-text { font-size: 14px; font-weight: 700; color: #2C150A; }
+.upload-hint { font-size: 12px; color: #A07050; }
+
+.upload-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.upload-preview img {
+  width: 72px; height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(200,134,10,.2);
+  flex-shrink: 0;
+}
+.upload-preview-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upload-preview-info span {
+  font-size: 13px;
+  color: #2C150A;
+  font-weight: 600;
+  word-break: break-all;
+}
+.upload-remove {
+  background: rgba(139,26,26,.1);
+  color: #8B1A1A;
+  border: 1px solid rgba(139,26,26,.2);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  width: fit-content;
+  transition: all .2s;
+}
+.upload-remove:hover { background: #8B1A1A; color: #fff; }
+
+.upload-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+}
+.upload-progress-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #C8860A, #F0B429);
+  transition: width .2s;
+  width: 0%;
+}
+#uploadProgressText {
+  font-size: 12px;
+  color: #7A3E18;
+  font-weight: 600;
+}
+/* ── آراء العملاء ── */
+.reviews-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 60px;
+}
+.review-admin-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(200,134,10,0.15);
+  box-shadow: 0 4px 14px rgba(44,21,10,0.08);
+}
+.review-admin-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+.review-del-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+}
+/* ── Videos Manager ── */
+.videos-manager {
+  border: 1.5px solid rgba(200,134,10,0.2);
+  border-radius: 16px;
+  background: #FDF8F0;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.videos-list { display: flex; flex-direction: column; gap: 8px; }
+.video-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid rgba(200,134,10,0.15);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.video-item-title { font-weight: 700; color: #2C150A; min-width: 120px; }
+.video-item-url { color: #C8860A; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.video-item-del {
+  background: rgba(139,26,26,0.1); color: #8B1A1A;
+  border: none; border-radius: 8px; padding: 4px 10px;
+  cursor: pointer; font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+.video-item-del:hover { background: #8B1A1A; color: #fff; }
+.video-add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.video-add-row .field { padding: 9px 12px; font-size: 13px; }
+.add-video-btn {
+  background: linear-gradient(135deg, #2C150A, #6B3F18);
+  color: #F5C843; border: none; border-radius: 10px;
+  padding: 9px 18px; cursor: pointer; font-weight: 700;
+  font-size: 13px; white-space: nowrap; transition: all 0.2s;
+  font-family: 'Cairo', Arial, sans-serif;
+}
+.add-video-btn:hover { background: linear-gradient(135deg, #C8860A, #F5C843); color: #1E0E04; }
+
+/* Videos in admin product card */
+.admin-videos-section { margin: 10px 0; }
+.admin-videos-section h5 { font-size: 12px; color: #7A3E18; font-weight: 700; margin: 0 0 6px; }
+.admin-video-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #FDF3DC; border: 1px solid rgba(200,134,10,0.25);
+  border-radius: 8px; padding: 4px 10px; margin: 2px;
+  font-size: 12px; color: #2C150A; font-weight: 600;
+}
+.admin-video-tag a { color: #C8860A; text-decoration: none; }
+
+/* ═══════════════════════════════
+   ADMIN REVIEWS
+   ═══════════════════════════════ */
+
+.reviews-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.review-admin-card {
+  background: #fff;
+  border: 1px solid rgba(200,134,10,.14);
+  border-radius: 22px;
+  padding: 12px;
+  box-shadow: 0 6px 22px rgba(44,21,10,.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.review-admin-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #FDF3DC;
+  border: 1px solid rgba(200,134,10,.18);
+}
+
+.review-del-btn {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 14px;
+  background: #8B1A1A;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .22s;
+}
+
+.review-del-btn:hover {
+  background: #B42323;
+  transform: translateY(-2px);
+}

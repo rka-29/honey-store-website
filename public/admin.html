@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>لوحة التحكم — عسل جناحي البحرين</title>
+
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="products.css"/>
+<link rel="stylesheet" href="admin.css"/>
+
+<style>
+  body.admin-locked .admin-hero,
+  body.admin-locked .admin-wrapper {
+    display: none !important;
+  }
+
+  .admin-lock-screen {
+    min-height: 100vh;
+    background: #FBF6EC;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  body.admin-locked .admin-lock-screen {
+    display: flex;
+  }
+
+  .admin-lock-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border: 1px solid rgba(200,136,12,0.18);
+    border-radius: 28px;
+    padding: 34px 28px;
+    text-align: center;
+    box-shadow: 0 12px 34px rgba(42,22,8,0.12);
+  }
+
+  .admin-lock-card h2 {
+    font-family: 'Amiri', serif;
+    color: #2A1608;
+    margin: 0 0 10px;
+    font-size: 2rem;
+  }
+
+  .admin-lock-card p {
+    color: #7A5535;
+    margin: 0 0 20px;
+    font-size: 14px;
+  }
+
+  .admin-lock-card input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(200,136,12,0.25);
+    background: #FFFDF7;
+    font-size: 15px;
+    text-align: center;
+    outline: none;
+    margin-bottom: 14px;
+    font-family: 'Cairo', Arial, sans-serif;
+  }
+
+  .admin-lock-card input:focus {
+    border-color: #C8880C;
+    box-shadow: 0 0 0 3px rgba(200,136,12,0.08);
+  }
+
+  .admin-lock-card button {
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg,#2A1608,#6B3F18);
+    color: #F5C843;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Cairo', Arial, sans-serif;
+    transition: all 0.22s;
+  }
+
+  .admin-lock-card button:hover {
+    background: linear-gradient(135deg,#C8880C,#F5C843);
+    color: #2A1608;
+    transform: translateY(-2px);
+  }
+
+  .admin-lock-error {
+    color: #8B1A1A;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+    font-weight: 700;
+  }
+</style>
+</head>
+
+<body class="admin-locked">
+
+<div class="admin-lock-screen" id="adminLockScreen">
+  <div class="admin-lock-card">
+    <h2>🔒 دخول الأدمن</h2>
+    <p>أدخل كلمة المرور لفتح لوحة التحكم</p>
+
+    <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" />
+
+    <button type="button" onclick="unlockAdmin()">دخول</button>
+
+    <div class="admin-lock-error" id="adminLockError">
+      كلمة المرور غير صحيحة
+    </div>
+  </div>
+</div>
+
+<header class="admin-hero">
+  <h1>🍯 لوحة تحكم الأدمن</h1>
+  <p>إضافة المنتجات وإدارتها</p>
+</header>
+
+<main class="admin-wrapper">
+
+  <div class="admin-sec-title">إضافة منتج جديد</div>
+
+  <div class="admin-form-card">
+    <form id="addProductForm" class="admin-form">
+
+      <div class="admin-fg">
+        <label class="field-label" for="name">اسم العسل</label>
+        <input type="text" id="name" class="field" placeholder="مثال: عسل السدر" required/>
+      </div>
+
+      <div class="admin-fg">
+        <label class="field-label" for="imageFile">صورة المنتج</label>
+
+        <div class="upload-box" id="uploadBox">
+          <input type="file" id="imageFile" accept="image/*" style="display:none"/>
+
+          <div class="upload-placeholder" id="uploadPlaceholder" onclick="document.getElementById('imageFile').click()">
+            <span class="upload-icon">📷</span>
+            <span class="upload-text">اضغط لاختيار صورة</span>
+            <span class="upload-hint">jpg, png, webp — ترفع إلى Cloudinary</span>
+          </div>
+
+          <div class="upload-preview" id="uploadPreview" style="display:none">
+            <img id="previewImg" src="" alt="معاينة"/>
+
+            <div class="upload-preview-info">
+              <span id="previewName"></span>
+              <button type="button" class="upload-remove" onclick="removeImage()">✕ إزالة</button>
+            </div>
+          </div>
+
+          <div class="upload-progress" id="uploadProgress" style="display:none">
+            <div class="upload-progress-bar" id="uploadProgressBar"></div>
+            <span id="uploadProgressText">جاري الرفع...</span>
+          </div>
+        </div>
+
+        <input type="hidden" id="image" required/>
+      </div>
+
+      <div class="admin-fg">
+        <label class="field-label" for="status">الحالة</label>
+
+        <select id="status" class="field">
+          <option value="available">متوفر</option>
+          <option value="sold_out">نفذت الكمية</option>
+        </select>
+      </div>
+
+      <div class="admin-fg span3">
+        <label class="field-label" for="description">وصف المنتج</label>
+
+        <textarea id="description" class="field" rows="3"
+          placeholder="اكتب وصفاً تفصيلياً للمنتج..." required></textarea>
+      </div>
+
+      <div class="admin-fg">
+        <label class="field-label" for="price_small">سعر نصف كيلو (د.ب)</label>
+        <input type="number" id="price_small" class="field" placeholder="0.000" step="0.001" required/>
+      </div>
+
+      <div class="admin-fg">
+        <label class="field-label" for="price_medium">سعر كيلو (د.ب)</label>
+        <input type="number" id="price_medium" class="field" placeholder="0.000" step="0.001" required/>
+      </div>
+
+      <div class="admin-fg span3">
+        <label class="field-label">روابط الفيديو</label>
+
+        <div class="videos-manager" id="videosManager">
+          <div class="videos-list" id="videosList"></div>
+
+          <div class="video-add-row">
+            <input type="text" id="videoTitle" class="field" placeholder="عنوان الفيديو" style="flex:1"/>
+            <input type="text" id="videoUrl" class="field" placeholder="رابط الفيديو" style="flex:2"/>
+            <button type="button" onclick="addVideoField()" class="add-video-btn">+ إضافة</button>
+          </div>
+        </div>
+
+        <input type="hidden" id="instagram" value="https://instagram.com/honey_janahi"/>
+      </div>
+
+      <div class="admin-fg">
+        <label class="field-label">شهادة الفحص</label>
+
+        <div class="upload-box" id="certUploadBox">
+          <input type="file" id="certFile" accept="image/*" style="display:none"/>
+
+          <div class="upload-placeholder" id="certPlaceholder" onclick="document.getElementById('certFile').click()">
+            <span class="upload-icon">📋</span>
+            <span class="upload-text">اضغط لرفع شهادة الفحص</span>
+            <span class="upload-hint">jpg, png, webp — ترفع إلى Cloudinary</span>
+          </div>
+
+          <div class="upload-preview" id="certPreview" style="display:none">
+            <img id="certPreviewImg" src="" alt="معاينة الشهادة"/>
+
+            <div class="upload-preview-info">
+              <span id="certPreviewName"></span>
+              <button type="button" class="upload-remove" onclick="removeCert()">✕ إزالة</button>
+            </div>
+          </div>
+
+          <div class="upload-progress" id="certProgress" style="display:none">
+            <div class="upload-progress-bar" id="certProgressBar"></div>
+            <span id="certProgressText">جاري الرفع...</span>
+          </div>
+        </div>
+
+        <input type="hidden" id="certificate"/>
+      </div>
+
+      <button type="submit" class="admin-submit">➕ إضافة المنتج</button>
+    </form>
+  </div>
+
+  <div class="admin-sec-title">إدارة المنتجات</div>
+  <div id="adminProductsContainer" class="admin-products-grid products-container"></div>
+
+  <div class="admin-sec-title" style="margin-top:50px;">آراء العملاء</div>
+
+  <div class="admin-form-card" style="margin-bottom:28px;">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+
+      <div class="upload-box" id="reviewUploadBox" style="flex:1;min-width:220px;">
+        <input type="file" id="reviewFile" accept="image/*" multiple style="display:none"/>
+
+        <div class="upload-placeholder" id="reviewPlaceholder" onclick="document.getElementById('reviewFile').click()">
+          <span class="upload-icon">🖼️</span>
+          <span class="upload-text">اضغط لرفع صور آراء العملاء</span>
+          <span class="upload-hint">يمكن رفع أكثر من صورة — ترفع إلى Cloudinary</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="reviewsGrid" class="reviews-admin-grid"></div>
+
+</main>
+
+<script type="module">
+  const ADMIN_PASSWORD = "Honey@2026";
+
+  const input = document.getElementById("adminPasswordInput");
+  const error = document.getElementById("adminLockError");
+
+  let adminLoaded = false;
+
+  async function openAdminPanel() {
+    document.body.classList.remove("admin-locked");
+
+    if (!adminLoaded) {
+      adminLoaded = true;
+      await import("./admin.js");
+    }
+  }
+
+  window.unlockAdmin = async function() {
+    const enteredPassword = input.value.trim();
+
+    if (enteredPassword === ADMIN_PASSWORD) {
+      sessionStorage.setItem("adminUnlocked", "yes");
+      await openAdminPanel();
+    } else {
+      error.style.display = "block";
+      input.value = "";
+      input.focus();
+    }
+  };
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      window.unlockAdmin();
+    }
+  });
+
+  if (sessionStorage.getItem("adminUnlocked") === "yes") {
+    openAdminPanel();
+  } else {
+    input.focus();
+  }
+</script>
+
+</body>
+</html>
