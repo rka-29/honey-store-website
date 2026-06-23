@@ -12,8 +12,15 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 // ══════════════════════════════════════
-//  Firebase Config
+// Firebase Config
 // ══════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyBsjwUzFyckvbpzURRogIJaYPa6pZsc4MM",
@@ -26,9 +33,13 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+const auth = getAuth(firebaseApp);
+
+/* حطي UID حق حساب الأدمن من Firebase Authentication هنا */
+const ADMIN_UID = "catSEZQZAOcuLP9IkMCvNkXZuOF2";
 
 // ══════════════════════════════════════
-//  Cloudinary Config
+// Cloudinary Config
 // ══════════════════════════════════════
 const CLOUDINARY_CLOUD_NAME = "dad1dl1sw";
 const CLOUDINARY_UPLOAD_PRESET = "dad1dl1sw";
@@ -36,33 +47,34 @@ const CLOUDINARY_UPLOAD_PRESET = "dad1dl1sw";
 const adminContainer = document.getElementById("adminProductsContainer");
 const addProductForm = document.getElementById("addProductForm");
 
-// ══════════════════════════════════════
-//  أدوات مساعدة
-// ══════════════════════════════════════
 let productVideos = [];
 let selectedProductImageFile = null;
 let selectedCertFile = null;
+let adminStarted = false;
 
+// ══════════════════════════════════════
+// أدوات مساعدة
+// ══════════════════════════════════════
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, function(ch) {
-    return ({
+    return {
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       '"': "&quot;",
       "'": "&#039;"
-    })[ch];
+    }[ch];
   });
 }
 
 function escapeAttr(value) {
   return String(value ?? "").replace(/[&<>"]/g, function(ch) {
-    return ({
+    return {
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       '"': "&quot;"
-    })[ch];
+    }[ch];
   });
 }
 
@@ -79,7 +91,6 @@ function productImageSrc(product) {
     return raw;
   }
 
-  // دعم مؤقت للصور القديمة داخل public/images
   return "images/" + raw;
 }
 
@@ -96,7 +107,6 @@ function reviewImageSrc(review) {
     return raw;
   }
 
-  // دعم مؤقت لصور الآراء القديمة داخل public/images
   return "images/" + raw;
 }
 
@@ -150,7 +160,6 @@ function timestampValue(value) {
   }
 
   const parsed = Date.parse(value);
-
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
@@ -165,7 +174,6 @@ function sortNewestFirst(items) {
     const aTime = timestampValue(a.createdAt || a.updatedAt || a.date);
 
     if (bTime !== aTime) return bTime - aTime;
-
     return numericIdValue(b.id) - numericIdValue(a.id);
   });
 }
@@ -215,7 +223,7 @@ async function uploadToCloudinary(file, folderName, progressDiv, progressBar, pr
 }
 
 // ══════════════════════════════════════
-//  إدارة الفيديوهات
+// إدارة الفيديوهات
 // ══════════════════════════════════════
 function addVideoField() {
   const title = document.getElementById("videoTitle").value.trim();
@@ -256,7 +264,7 @@ function renderVideosList() {
 }
 
 // ══════════════════════════════════════
-//  صورة المنتج — Cloudinary
+// صورة المنتج
 // ══════════════════════════════════════
 const imageHidden = document.getElementById("image");
 const uploadPlaceholder = document.getElementById("uploadPlaceholder");
@@ -287,7 +295,6 @@ if (imageFileInput) {
 
       if (uploadProgress) uploadProgress.style.display = "none";
 
-      // الرفع الفعلي يتم عند الضغط على إضافة المنتج
       imageHidden.value = file.name;
     };
 
@@ -309,7 +316,7 @@ function removeImage() {
 }
 
 // ══════════════════════════════════════
-//  شهادة الفحص — Cloudinary
+// شهادة الفحص
 // ══════════════════════════════════════
 const certHidden = document.getElementById("certificate");
 const certPlaceholder = document.getElementById("certPlaceholder");
@@ -340,7 +347,6 @@ if (certFile) {
 
       if (certProgress) certProgress.style.display = "none";
 
-      // الرفع الفعلي يتم عند الضغط على إضافة المنتج
       certHidden.value = file.name;
     };
 
@@ -362,7 +368,7 @@ function removeCert() {
 }
 
 // ══════════════════════════════════════
-//  تحميل المنتجات
+// تحميل المنتجات
 // ══════════════════════════════════════
 async function loadProducts() {
   if (!adminContainer) return;
@@ -373,10 +379,7 @@ async function loadProducts() {
     const snapshot = await getDocs(collection(db, "products"));
 
     const products = snapshot.docs.map(function(d) {
-      return {
-        id: d.id,
-        ...d.data()
-      };
+      return { id: d.id, ...d.data() };
     });
 
     sortNewestFirst(products);
@@ -400,8 +403,12 @@ async function loadProducts() {
       adminContainer.innerHTML += `
         <div class="product-card">
           <div class="product-image-wrap">
-            <img src="${escapeAttr(img)}" alt="${escapeHtml(product.name)}" class="product-image"
-              onerror="this.style.background='linear-gradient(135deg,#C8860A,#F0B429)';this.removeAttribute('src')"/>
+            <img
+              src="${escapeAttr(img)}"
+              alt="${escapeHtml(product.name)}"
+              class="product-image"
+              onerror="this.style.background='linear-gradient(135deg,#C8860A,#F0B429)';this.removeAttribute('src')"
+            />
           </div>
 
           <div class="product-body">
@@ -439,6 +446,17 @@ async function loadProducts() {
             <div class="admin-buttons">
               <button onclick="deleteProduct('${escapeAttr(product.id)}')" class="delete-btn">🗑 حذف</button>
               <button onclick="markAvailable('${escapeAttr(product.id)}')" class="available-btn">✓ متوفر</button>
+              <button
+                onclick="openEditModal(this)"
+                data-id="${escapeAttr(product.id)}"
+                data-name="${escapeAttr(product.name)}"
+                data-desc="${escapeAttr(product.description || "")}"
+                data-small="${escapeAttr(String(product.price_small || 0))}"
+                data-medium="${escapeAttr(String(product.price_medium || 0))}"
+                class="available-btn edit-btn"
+              >
+                ✏️ تعديل البيانات
+              </button>
             </div>
           </div>
         </div>
@@ -451,7 +469,7 @@ async function loadProducts() {
 }
 
 // ══════════════════════════════════════
-//  إضافة منتج
+// إضافة منتج
 // ══════════════════════════════════════
 if (addProductForm) {
   addProductForm.addEventListener("submit", async function(e) {
@@ -493,18 +511,16 @@ if (addProductForm) {
 
       const snapshot = await getDocs(collection(db, "products"));
 
-      const ids = snapshot.docs.map(function(d) {
-        return Number(d.id);
-      }).filter(function(num) {
-        return Number.isFinite(num);
-      });
+      const ids = snapshot.docs
+        .map(function(d) { return Number(d.id); })
+        .filter(function(num) { return Number.isFinite(num); });
 
       const newId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
 
       await setDoc(doc(db, "products", String(newId)), {
         name: document.getElementById("name").value.trim(),
         description: document.getElementById("description").value.trim(),
-        whatsapp:"",
+        whatsapp: "",
         instagram: "",
         image: uploadedImage.url,
         imageUrl: uploadedImage.url,
@@ -551,7 +567,7 @@ if (addProductForm) {
 }
 
 // ══════════════════════════════════════
-//  حذف منتج
+// حذف وتحديث المنتج
 // ══════════════════════════════════════
 async function deleteProduct(id) {
   if (!confirm("هل تريد حذف هذا المنتج؟")) return;
@@ -565,9 +581,6 @@ async function deleteProduct(id) {
   }
 }
 
-// ══════════════════════════════════════
-//  تغيير حالة المنتج لمتوفر
-// ══════════════════════════════════════
 async function markAvailable(id) {
   try {
     await updateDoc(doc(db, "products", String(id)), {
@@ -583,7 +596,7 @@ async function markAvailable(id) {
 }
 
 // ══════════════════════════════════════
-//  إضافة فيديو لمنتج موجود
+// فيديوهات المنتج
 // ══════════════════════════════════════
 async function addVideoToProduct(productId) {
   const titleEl = document.getElementById("vt-" + productId);
@@ -598,8 +611,6 @@ async function addVideoToProduct(productId) {
   }
 
   try {
-    const docRef = doc(db, "products", String(productId));
-
     const snapshot = await getDocs(collection(db, "products"));
 
     const productDoc = snapshot.docs.find(function(d) {
@@ -614,7 +625,7 @@ async function addVideoToProduct(productId) {
     const videos = getStoredVideos(productDoc.data());
     videos.push({ title, url });
 
-    await updateDoc(docRef, {
+    await updateDoc(doc(db, "products", String(productId)), {
       videos,
       updatedAt: serverTimestamp()
     });
@@ -629,9 +640,6 @@ async function addVideoToProduct(productId) {
   }
 }
 
-// ══════════════════════════════════════
-//  حذف فيديو من منتج
-// ══════════════════════════════════════
 async function removeVideoFromProduct(productId, idx) {
   try {
     const snapshot = await getDocs(collection(db, "products"));
@@ -659,7 +667,7 @@ async function removeVideoFromProduct(productId, idx) {
 }
 
 // ══════════════════════════════════════
-//  آراء العملاء
+// آراء العملاء
 // ══════════════════════════════════════
 async function loadReviews() {
   const grid = document.getElementById("reviewsGrid");
@@ -672,10 +680,7 @@ async function loadReviews() {
     const snapshot = await getDocs(collection(db, "reviews"));
 
     const reviews = snapshot.docs.map(function(d) {
-      return {
-        id: d.id,
-        ...d.data()
-      };
+      return { id: d.id, ...d.data() };
     });
 
     sortNewestFirst(reviews);
@@ -713,7 +718,6 @@ async function deleteReview(id) {
   }
 }
 
-// رفع صور آراء العملاء إلى Cloudinary
 const reviewFileInput = document.getElementById("reviewFile");
 
 if (reviewFileInput) {
@@ -732,23 +736,19 @@ if (reviewFileInput) {
     try {
       const snapshot = await getDocs(collection(db, "reviews"));
 
-      const ids = snapshot.docs.map(function(d) {
-        return Number(d.id);
-      }).filter(function(num) {
-        return Number.isFinite(num);
-      });
+      const ids = snapshot.docs
+        .map(function(d) { return Number(d.id); })
+        .filter(function(num) { return Number.isFinite(num); });
 
       let maxId = ids.length > 0 ? Math.max(...ids) : 0;
 
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
         if (uploadText) {
           uploadText.textContent = "جاري رفع الصورة " + (i + 1) + " من " + files.length + "...";
         }
 
         const uploaded = await uploadToCloudinary(
-          file,
+          files[i],
           "janahi-honey/reviews",
           null,
           null,
@@ -779,7 +779,6 @@ if (reviewFileInput) {
       loadReviews();
     } catch (err) {
       console.error("Error saving reviews:", err);
-
       alert("فشل حفظ الآراء: " + err.message);
 
       if (uploadText) {
@@ -790,13 +789,11 @@ if (reviewFileInput) {
 }
 
 // ══════════════════════════════════════
-//  إحصائيات الصفحة الرئيسية
+// إحصائيات الصفحة الرئيسية
 // ══════════════════════════════════════
 async function loadStats() {
   try {
-    const docRef = doc(db, "settings", "stats");
-    const docSnap = await getDoc(docRef);
-
+    const docSnap = await getDoc(doc(db, "settings", "stats"));
     const statsInput = document.getElementById("statsText");
 
     if (statsInput && docSnap.exists()) {
@@ -842,11 +839,10 @@ async function saveStats() {
   }
 }
 
-// إضافة قسم الإحصائيات في الصفحة
 function addStatsSection() {
   const main = document.querySelector(".admin-wrapper");
 
-  if (!main) return;
+  if (!main || document.getElementById("statsText")) return;
 
   const section = document.createElement("div");
 
@@ -872,8 +868,246 @@ function addStatsSection() {
 }
 
 // ══════════════════════════════════════
-//  تصدير الدوال للاستخدام في HTML
+// تعديل بيانات المنتج
 // ══════════════════════════════════════
+function openEditModal(btn) {
+  const id = btn.dataset.id;
+  const name = btn.dataset.name;
+  const desc = btn.dataset.desc;
+  const small = btn.dataset.small;
+  const medium = btn.dataset.medium;
+
+  const old = document.getElementById("editModal");
+  if (old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "editModal";
+
+  modal.style.cssText = `
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  `;
+
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:24px;padding:28px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.3);direction:rtl;">
+      <h3 style="font-family:'Amiri',serif;color:#2C150A;margin:0 0 20px;font-size:1.4rem;">✏️ تعديل بيانات المنتج</h3>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label class="field-label">اسم العسل</label>
+          <input type="text" id="editName" class="field" value="${escapeAttr(name)}" style="width:100%;"/>
+        </div>
+
+        <div>
+          <label class="field-label">الوصف</label>
+          <textarea id="editDesc" class="field" rows="4" style="width:100%;">${escapeHtml(desc)}</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="field-label">سعر نصف كيلو (د.ب)</label>
+            <input type="number" id="editSmall" class="field" value="${escapeAttr(small)}" step="0.001"/>
+          </div>
+
+          <div>
+            <label class="field-label">سعر كيلو (د.ب)</label>
+            <input type="number" id="editMedium" class="field" value="${escapeAttr(medium)}" step="0.001"/>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+          <button onclick="saveEdit('${escapeAttr(id)}')" style="border:none;border-radius:99px;padding:13px;background:linear-gradient(135deg,#2C150A,#7A3E18);color:#F0B429;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',Arial,sans-serif;">💾 حفظ</button>
+
+          <button onclick="document.getElementById('editModal').remove()" style="border:none;border-radius:99px;padding:13px;background:#f0f0f0;color:#2C150A;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',Arial,sans-serif;">✕ إلغاء</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal) modal.remove();
+  });
+}
+
+async function saveEdit(id) {
+  const name = document.getElementById("editName").value.trim();
+  const desc = document.getElementById("editDesc").value.trim();
+  const small = Number(document.getElementById("editSmall").value || 0);
+  const medium = Number(document.getElementById("editMedium").value || 0);
+
+  if (!name) {
+    alert("أدخل اسم العسل");
+    return;
+  }
+
+  const saveBtn = document.querySelector("#editModal button");
+  const originalText = saveBtn.textContent;
+
+  saveBtn.textContent = "جاري الحفظ...";
+  saveBtn.disabled = true;
+
+  try {
+    await updateDoc(doc(db, "products", String(id)), {
+      name,
+      description: desc,
+      price_small: small,
+      price_medium: medium,
+      updatedAt: serverTimestamp()
+    });
+
+    document.getElementById("editModal").remove();
+    loadProducts();
+  } catch (err) {
+    console.error("Error updating product:", err);
+    alert("فشل الحفظ: " + err.message);
+
+    saveBtn.textContent = originalText;
+    saveBtn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════
+// Firebase Authentication
+// ══════════════════════════════════════
+const adminLoginForm = document.getElementById("adminLoginForm");
+const adminEmailInput = document.getElementById("adminEmailInput");
+const adminPasswordInput = document.getElementById("adminPasswordInput");
+const adminLoginBtn = document.getElementById("adminLoginBtn");
+const adminLockError = document.getElementById("adminLockError");
+const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+
+function showAuthError(message) {
+  adminLockError.textContent = message;
+  adminLockError.style.display = "block";
+}
+
+function clearAuthError() {
+  adminLockError.textContent = "";
+  adminLockError.style.display = "none";
+}
+
+function startAdminPanel() {
+  if (adminStarted) return;
+
+  adminStarted = true;
+
+  loadProducts();
+  loadReviews();
+  addStatsSection();
+}
+
+function getLoginErrorMessage(error) {
+  const code = error?.code || "";
+
+  if (
+    code === "auth/invalid-credential" ||
+    code === "auth/user-not-found" ||
+    code === "auth/wrong-password"
+  ) {
+    return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+  }
+
+  if (code === "auth/too-many-requests") {
+    return "تمت محاولات كثيرة. انتظر قليلاً ثم حاول مرة أخرى";
+  }
+
+  if (code === "auth/invalid-email") {
+    return "صيغة البريد الإلكتروني غير صحيحة";
+  }
+
+  return "تعذر تسجيل الدخول. تأكد من الإنترنت ومن بيانات الحساب";
+}
+
+if (adminLoginForm) {
+  adminLoginForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email = adminEmailInput.value.trim();
+    const password = adminPasswordInput.value;
+
+    if (!email || !password) {
+      showAuthError("أدخل البريد الإلكتروني وكلمة المرور");
+      return;
+    }
+
+    clearAuthError();
+
+    const originalText = adminLoginBtn.textContent;
+    adminLoginBtn.textContent = "جاري تسجيل الدخول...";
+    adminLoginBtn.disabled = true;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Firebase Auth Error:", error);
+
+      showAuthError(getLoginErrorMessage(error));
+      adminPasswordInput.value = "";
+      adminPasswordInput.focus();
+    } finally {
+      adminLoginBtn.textContent = originalText;
+      adminLoginBtn.disabled = false;
+    }
+  });
+}
+
+if (adminLogoutBtn) {
+  adminLogoutBtn.addEventListener("click", async function() {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout Error:", error);
+      alert("تعذر تسجيل الخروج");
+    }
+  });
+}
+
+onAuthStateChanged(auth, async function(user) {
+  if (!user) {
+    document.body.classList.add("admin-locked");
+
+    if (adminLogoutBtn) {
+      adminLogoutBtn.style.display = "none";
+    }
+
+    return;
+  }
+
+  if (user.uid !== ADMIN_UID) {
+    showAuthError("هذا الحساب غير مصرح له بالدخول إلى لوحة الأدمن");
+
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Unauthorized logout error:", error);
+    }
+
+    return;
+  }
+
+  clearAuthError();
+  document.body.classList.remove("admin-locked");
+
+  if (adminLogoutBtn) {
+    adminLogoutBtn.style.display = "block";
+  }
+
+  startAdminPanel();
+});
+
+// ══════════════════════════════════════
+// تصدير الدوال للاستخدام في HTML
+// ══════════════════════════════════════
+window.openEditModal = openEditModal;
+window.saveEdit = saveEdit;
 window.addVideoField = addVideoField;
 window.removeVideo = removeVideo;
 window.deleteProduct = deleteProduct;
@@ -884,10 +1118,3 @@ window.deleteReview = deleteReview;
 window.removeImage = removeImage;
 window.removeCert = removeCert;
 window.saveStats = saveStats;
-
-// ══════════════════════════════════════
-//  تشغيل الصفحة
-// ══════════════════════════════════════
-loadProducts();
-loadReviews();
-addStatsSection();

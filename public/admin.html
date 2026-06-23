@@ -54,6 +54,7 @@
 
   .admin-lock-card input {
     width: 100%;
+    box-sizing: border-box;
     padding: 14px 16px;
     border-radius: 16px;
     border: 1.5px solid rgba(200,136,12,0.25);
@@ -75,7 +76,7 @@
     border: none;
     border-radius: 999px;
     padding: 14px 18px;
-    background: linear-gradient(135deg,#2A1608,#6B3F18);
+    background: linear-gradient(135deg, #2A1608, #6B3F18);
     color: #F5C843;
     font-size: 15px;
     font-weight: 800;
@@ -85,7 +86,7 @@
   }
 
   .admin-lock-card button:hover {
-    background: linear-gradient(135deg,#C8880C,#F5C843);
+    background: linear-gradient(135deg, #C8880C, #F5C843);
     color: #2A1608;
     transform: translateY(-2px);
   }
@@ -102,22 +103,42 @@
 
 <body class="admin-locked">
 
-<div class="admin-lock-screen" id="adminLockScreen">
-  <div class="admin-lock-card">
+<div class="admin-lock-screen">
+  <form class="admin-lock-card" id="adminLoginForm">
     <h2>🔒 دخول الأدمن</h2>
-    <p>أدخل كلمة المرور لفتح لوحة التحكم</p>
+    <p>سجّل دخولك بالبريد الإلكتروني وكلمة المرور</p>
 
-    <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" />
+    <input
+      type="email"
+      id="adminEmailInput"
+      placeholder="البريد الإلكتروني"
+      autocomplete="username"
+      required
+    />
 
-    <button type="button" onclick="unlockAdmin()">دخول</button>
+    <input
+      type="password"
+      id="adminPasswordInput"
+      placeholder="كلمة المرور"
+      autocomplete="current-password"
+      required
+    />
 
-    <div class="admin-lock-error" id="adminLockError">
-      كلمة المرور غير صحيحة
-    </div>
-  </div>
+    <button type="submit" id="adminLoginBtn">دخول</button>
+
+    <div class="admin-lock-error" id="adminLockError"></div>
+  </form>
 </div>
 
 <header class="admin-hero">
+  <button
+    type="button"
+    id="adminLogoutBtn"
+    style="position:absolute;top:18px;left:5%;border:1px solid rgba(44,21,10,.25);border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.55);color:#2C150A;font-family:'Cairo',Arial,sans-serif;font-weight:800;cursor:pointer;"
+  >
+    تسجيل الخروج
+  </button>
+
   <h1>🍯 لوحة تحكم الأدمن</h1>
   <p>إضافة المنتجات وإدارتها</p>
 </header>
@@ -247,7 +268,6 @@
 
   <div class="admin-form-card" style="margin-bottom:28px;">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-
       <div class="upload-box" id="reviewUploadBox" style="flex:1;min-width:220px;">
         <input type="file" id="reviewFile" accept="image/*" multiple style="display:none"/>
 
@@ -257,7 +277,6 @@
           <span class="upload-hint">يمكن رفع أكثر من صورة — ترفع إلى Cloudinary</span>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -265,48 +284,6 @@
 
 </main>
 
-<script type="module">
-  const ADMIN_PASSWORD = "Honey@2026";
-
-  const input = document.getElementById("adminPasswordInput");
-  const error = document.getElementById("adminLockError");
-
-  let adminLoaded = false;
-
-  async function openAdminPanel() {
-    document.body.classList.remove("admin-locked");
-
-    if (!adminLoaded) {
-      adminLoaded = true;
-      await import("./admin.js");
-    }
-  }
-
-  window.unlockAdmin = async function() {
-    const enteredPassword = input.value.trim();
-
-    if (enteredPassword === ADMIN_PASSWORD) {
-      sessionStorage.setItem("adminUnlocked", "yes");
-      await openAdminPanel();
-    } else {
-      error.style.display = "block";
-      input.value = "";
-      input.focus();
-    }
-  };
-
-  input.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-      window.unlockAdmin();
-    }
-  });
-
-  if (sessionStorage.getItem("adminUnlocked") === "yes") {
-    openAdminPanel();
-  } else {
-    input.focus();
-  }
-</script>
-
+<script type="module" src="admin.js"></script>
 </body>
 </html>

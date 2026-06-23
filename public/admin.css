@@ -59,11 +59,31 @@
 
 /* ── PRODUCTS GRID ── */
 .admin-products-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:22px;
 }
 
-/* product card — reuses products.css rules, add only admin extras */
-.admin-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.admin-products-grid .product-card {
+  grid-template-columns: 180px 1fr;
+}
+
+.admin-products-grid .product-image-wrap {
+  grid-column: 1;
+}
+
+.admin-products-grid .product-card h3 {
+  grid-column: 2;
+}
+
+.admin-products-grid .desc-short,
+.admin-products-grid .desc-full {
+  grid-column: 2;
+}
+
+.admin-products-grid .toggle-btn {
+  grid-column: 2;
+}
+
+.admin-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px;grid-column:1/3}
 
 .available-btn{
   background:#FDF3DC;color:#2C150A;
@@ -293,4 +313,35 @@
 .review-del-btn:hover {
   background: #B42323;
   transform: translateY(-2px);
+}
+/* ── ADMIN PRODUCTS RESPONSIVE ── */
+@media (max-width: 700px) {
+  .admin-products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-products-grid .product-card {
+    grid-template-columns: 125px 1fr;
+    padding: 14px;
+    gap: 8px 10px;
+  }
+
+  .admin-products-grid .product-image-wrap {
+    width: 125px;
+    height: 140px;
+  }
+
+  .admin-wrapper {
+    padding: 24px 14px 80px;
+  }
+}
+/* ── زر تعديل ── */
+.edit-btn {
+  grid-column: 1 / 3;
+  background: #FDF3DC !important;
+  border: 1.5px solid rgba(200,134,10,0.4) !important;
+  color: #2C150A !important;
+}
+.edit-btn:hover {
+  background: #FDEAB0 !important;
 }
